@@ -30,3 +30,40 @@ Por fim, temos também as expressões de igualdade e desigualdade:
 Para a expressão de "igual" usamos o símbolo "=", ou escrevemos "EQ" (de "equal", igual).
 Para a expressão de "diferente" usamos o símbolo "~=", ou escrevemos "NE" (de " not equal", ou "não igual").
 A documentação SAS completa sobre os operadores em expressões pode ser acessada neste link (em inglês).
+
+Aprendemos como usar um novo tipo de comando no SAS, o data step, para criar em nossa base de dados uma nova variável contendo a informação se um jogo é um “lançamento” ou não (uma variável de marcação, também conhecida como flag). Nosso código havia ficado assim:
+
+DATA teste;
+set alura.cadastro_produto;
+
+if data > 201606
+    then lancamento = 1;
+    else lancamento = 0;
+
+RUN;COPIAR CÓDIGO
+
+Precisamos também criar a variável que marca quais jogos são antigos usando também um data step.
+
+Crie uma uma variável chamada antigo, que tem o valor 1 para jogos lançados antes de 2014 e 0 caso contrário. Depois use o comando de PROC FREQ para ver quantos jogos antigos nós temos em nossa base de cadastro_produto.
+
+Podemos aproveitar o mesmo data step acima para, inclusive, criar ambas as variáveis num passo só. Nosso código fica assim:
+
+DATA teste;
+set alura.cadastro_produto;
+
+if data > 201606
+    then lancamento = 1;
+    else lancamento = 0;
+
+if data < 201401
+    then antigo = 1;
+    else antigo = 0;
+
+RUN;COPIAR CÓDIGO
+
+E podemos usar nosso PROC FREQ para checar ambas as variáveis ao mesmo tempo também. Para isso, nosso código fica assim:
+
+PROC FREQ
+    data = teste;
+    table lancamento antigo;
+RUN;COPIAR CÓDIGO
