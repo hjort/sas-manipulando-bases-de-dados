@@ -54,3 +54,14 @@ label Genero = "Gênero"
 
 RUN;COPIAR CÓDIGO
 Obs: no lugar de teste, coloque o nome da base onde você criou a variável lancamento.
+
+Vimos diversas opções dentro do PROC FREQ que nos permitem suprimir uma ou mais informações que, por padrão, seriam mostradas em nosso resultado. Porém, existe mais uma que nos pode ser útil. Quando o resultado do relatório de frequências é em formato de lista, são fornecidas 4 informações diferentes: a frequência e o percentual, tanto da célula quanto o acumulado até aquela célula da lista. Se quisermos que as informações de valor acumulado não sejam mostradas no resultado, podemos usar a opção nocum ("não acumulado"), assim, tanto a frequência quanto o percentual acumulados não serão mostrados.
+
+Por exemplo, se na nossa listagem de gênero de cada jogo que vimos em aula não quisermos que as informações acumuladas apareçam, podemos usar o código abaixo:
+
+PROC FREQ
+    data = alura.cadastro_produto;
+    table nome*genero
+    / list nocum;
+RUN;
+
