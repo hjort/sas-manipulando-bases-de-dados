@@ -39,3 +39,18 @@ RUN;COPIAR CÓDIGO
 Mas a nossa base ainda está sendo salva na work, uma biblioteca automaticamente gerada pelo SAS onde são colocadas todas as bases que são criadas fora de uma biblioteca especificada pelo usuário. Essa biblioteca é temporária, no sentido que sempre que eu encerro minha sessão no SAS, fechando o programa, essa biblioteca “deixa de existir”, e tudo o que estava nela é apagado. Ao iniciar uma nova sessão, uma nova work é gerada.
 
 Não queremos perder a nossa base! Por isso precisamos salvá-la no nosso diretório do projeto da AluraPlay. Salve a base onde você criou a variável lançamento na biblioteca alura, usando um data step, mas aproveite para, ao mesmo tempo, renomear a variável lancamento para flag_lancamento e, usando o comando label, definir os rótulos da variável Genero como “Gênero” e da variável lancamento como o texto “Marca 1 para jogos que são lançamento e 0 caso contrário”.
+
+Para fazer todas estas operações podemos usar o seguinte data step:
+
+/* Salva a minha base intermediária no diretório da AluraPlay */
+
+DATA alura.cadastro_produto_v2;
+set teste;
+
+rename lancamento = flag_lancamento;
+
+label Genero = "Gênero"
+    lancamento = "Marca 1 para jogos que são lançamento e 0 caso contrário";
+
+RUN;COPIAR CÓDIGO
+Obs: no lugar de teste, coloque o nome da base onde você criou a variável lancamento.
