@@ -1,0 +1,52 @@
+Na aula checamos o conteúdo da nossa base de cadastro de produtos usando o PROC CONTENTS, que foi escrito na seguinte forma:
+
+PROC CONTENTS data = alura.cadastro_produto;
+RUN;COPIAR CÓDIGO
+
+Tente agora, usando o mesmo comando, checar o conteúdo da base de cadastro de clientes (chamada de “cadastro_cliente”). Lembre-se que antes de acessarmos a nossa base fizemos algumas coisas, como:
+
+Criamos uma pasta própria para colocarmos os nossos arquivos do projeto e colocamos nossas bases lá.
+Associamos nossa pasta ao nome de uma biblioteca usando o comando LIBNAME.
+Não se esqueça de fazer estes passos antes, e tente também utilizar o comando PROC CONTENTS para checar as bases em seu diretório.
+
+Antes de mais nada, temos que organizar nosso projeto criando uma pasta para ele. Podemos fazer isso usando o menu lateral esquerdo, na seção de Arquivos e Pastas do Servidor (“Server Files and Folders”), clicando no botão novo e escolher Pasta (“Folder”).
+
+
+
+No menu que aparece escolhemos onde a pasta será criada e seu nome.
+
+
+
+É nesta pasta que criamos que devemos colocar as nossas bases do curso.
+
+
+
+Obs: também podemos criar a pasta da mesma forma que costumamos criá-las em nossas máquinas, basta que a criemos dentro do nosso diretório compartilhado “myfolders”.
+
+Agora basta declararmos nossa biblioteca usando o comando LIBNAME da seguinte forma:
+
+LIBNAME alura “/folders/myfolders/AluraPlay”;COPIAR CÓDIGO
+
+Podemos executar esse trecho do código apertando de executar (“Run”) na barra de menu superior ou apertando a tecla F3. Isso fará com que nossa biblioteca seja declarada e agora já podemos começar a trabalhar com nossas bases. Vamos começar checando nossa biblioteca com o procedimento DATASETS:
+
+PROC DATASETS
+    lib = alura details;
+RUN;COPIAR CÓDIGO
+
+Lembrando que a opção details serve para que o SAS nos mostre mais informações sobre as bases presentes na nossa biblioteca Alura. Cheque se ambas as bases aparecem no final dos resultados corretamente.
+
+Na aula, checamos o conteúdo e imprimimos a base de cadastro de produtos usando os comandos abaixo:
+
+PROC CONTENTS data = alura.cadastro_produto;
+RUN;
+
+PROC PRINT data = alura.cadastro_produto;
+RUN;COPIAR CÓDIGO
+
+De maneira análoga, se desejamos fazer as mesmas operações na nossa base de cadastro de clientes basta mudar o nome da base após a chamada da biblioteca. Se fizermos isso teremos o seguinte resultado:
+
+PROC CONTENTS data = alura.cadastro_cliente;
+RUN;
+
+PROC PRINT data = alura.cadastro_cliente;
+RUN;COPIAR CÓDIGO
