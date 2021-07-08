@@ -1,0 +1,32 @@
+if data > 201606
+    then lancamento = 1;
+    else lancamento = 0;COPIAR CÓDIGO
+    
+O código acima mostra a expressão que vimos em aula, onde usamos um comparador de "maior que", usando o símbolo de ">", para construir a empressão usada na construção de nossa variável lancamento. Mas todas as demais condições de comparação da matemática também existem no SAS, e elas podem ser escritas de diversas formas:
+
+Como vimos, na expressão de "maior" usamos o símbolo ">", ou também podemos escrever "GT" (do inglês "greater than", que significa "maior que"), da seguinte forma:
+if data gt 201606COPIAR CÓDIGO
+
+Se quisermos usar a expressão de "maior ou igual" usamos o símbolo ">=", ou escrevemos "GE" (do inglês "greater or equal", maior ou igual). O condicional que fizemos acima ("maior que junho de 2016"), por exemplo, poderia ser trocado por "maior ou igual a julho de 2016", e assim ser escrito nas seguintes formas:
+if data >= 201607COPIAR CÓDIGO
+
+ou
+if data ge 201607COPIAR CÓDIGO
+
+No exercício que fizemos um código para marcar como 1 os jogos lançados depois de 201606 e 0 caso contrário, mas também poderíamos obter como resultado construindo uma expressão do tipo: Marcar como 0 os jogos lançados antes de 201607, e 1 caso contrário. Para isso precisaríamos usar a expressão de "menor". As expressões do tipo "menor" ou "menor ou igual" também existem:
+
+Para a expressão de "menor" usamos o símbolo "<" ou escrevemos "LT" (de "less than", ou menor que). Nosso código ficaria na seguinte forma:
+if data < 201607
+  then lancamento = 0;
+  else lancamento = 1;COPIAR CÓDIGO
+  
+Para a expressão de "menor ou igual" usamos o símbolo "<=" ou escrevemos "LE" (de "less or equal", ou menor ou igual). Nosso código ficaria na seguinte forma:
+if data <= 201606
+  then lancamento = 0;
+  else lancamento = 1;COPIAR CÓDIGO
+  
+Por fim, temos também as expressões de igualdade e desigualdade:
+
+Para a expressão de "igual" usamos o símbolo "=", ou escrevemos "EQ" (de "equal", igual).
+Para a expressão de "diferente" usamos o símbolo "~=", ou escrevemos "NE" (de " not equal", ou "não igual").
+A documentação SAS completa sobre os operadores em expressões pode ser acessada neste link (em inglês).
