@@ -81,3 +81,14 @@ set alura.cadastro_cliente;
 precep = input(substr(cep,1,2),best.);
 
 RUN;
+
+
+Caso você queira saber mais sobre os formatos de variáveis no SAS, a documentação pode ser acessada por este link. Por exemplo, um outro formato interessante para variáveis de texto é o $UPCASEn., onde n é o tamanho da variável, ele faz com que todas as letras das palavras apareçam como maiúsculas. Por exemplo, se usássemos $UPCASE14. no lugar do $14. na variável Estado, nossos textos apareceriam como DEMAIS ESTADOS, GRANDE SP, INTERIOR SP, etc.
+
+E retificando uma informação, o comando length pode ser usado em variáveis do tipo caractere também, ele só precisa ser usado de uma forma diferente. Por exemplo, no caso da nossa variável Estado, o comando length Estado 14; não funciona, mas se colocarmos o cifrão antes do número (length Estado $14;) ele funciona. Mas esse comando ainda define apenas o tamanho da variável, não o seu formato (o comando format pode definir ambos os parâmetros).
+
+https://www.correios.com.br/para-voce/precisa-de-ajuda/o-que-e-cep-e-por-que-usa-lo/estrutura-do-cep
+http://www.buscacep.correios.com.br/sistemas/buscacep/buscaFaixaCep.cfm
+https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/viewer.htm#a001263753.htm
+https://thiagorodrigo.com.br/artigo/cep-brasil-lista-de-cep-por-estados-capitais-e-interior/
+
