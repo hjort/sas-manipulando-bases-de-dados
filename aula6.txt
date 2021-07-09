@@ -1,0 +1,132 @@
+Vimos alguns comandos adicionais nesta aula que nos ajudam a manipular uma base, como:
+
+drop: Descarta da base as variáveis declaradas.
+keep: Mantém na base apenas as variáveis declaradas.
+Vimos que estes comandos podem ser usados de uma forma parecida com a que usamos o comando where na hora de chamarmos uma base de entrada (colocando entre parênteses, separados por um sinal de igual).
+
+Vimos também o comando obs, muito útil para agilizar os testes em bases muito grandes, que mantém apenas o número de linhas declarado. Podemos fazer o SAS voltar a usar todas as linhas das bases usando o comando obs=max.
+
+Nós também criamos o nosso próprio formato que determina o estado a partir dos dois primeiros números do CEP, usando o PROC FORMAT. Como já obtemos os dois primeiros dígitos do CEP em formato numérico na aula anterior (na variável precep), o formato que criamos foi o seguinte:
+
+PROC FORMAT;
+    value estados_
+        low - 09 = "Grande SP"
+        10 - 19  = "Interior SP"
+        20 - 28  = "Rio de Janeiro"
+        30 - 39  = "Minas Gerais"
+        80 - 87  = "Paraná"
+        OTHER    = "Demais estados";
+RUN;COPIAR CÓDIGO
+
+Aplicamos esse formato na variável precep usando o comando “irmão” do input, o put, e depois vimos que podemos aninhar todos estes comandos em uma única linha, e obtivemos o seguinte código:
+
+DATA teste1;
+set alura.cadastro_cliente;
+
+Estado = put(input(substr(cep,1,2),best.),estados_.);
+
+RUN;COPIAR CÓDIGO
+
+Usando o PROC FREQ também, crie dois formatos: Um que relaciona os intervalos do CEP dos estados que desejamos estudar em formato de texto a um número (que corresponde à posição que queremos que aquele estado apareça em nossa listagem); outro que relaciona os números definidos acima aos estados correspondentes.
+
+Depois, usando os comandos input e format faça com que o nome dos estados apareçam como uma “máscara” sobre seus números correspondentes. Lembre-se de que os formatos que possuem textos como entrada devem, no PROC FORMAT, serem declarados com o parâmetro “irmão” do VALUE, o INVALUE.
+
+O código completo, como feito em aula, ficou assim:
+
+/* Carrego meu formatos */
+PROC FORMAT;
+    /* Início do CEP => lista numérica ordenada */ 
+    invalue estadosnum_
+        low  - "09" = 1
+        "10" - "19" = 2
+        "20" - "28" = 3
+        "30" - "39" = 4
+        "80" - "87" = 5
+        OTHER        = 6;
+    /* Lista numérica => Nome do estado */
+    value estadotxt_
+        1 = "Grande SP"
+        2 = "Interior SP"
+        3 = "Rio de Janeiro"
+        4 = "Minas Gerais"
+        5 = "Paraná"
+        OTHER = "Demais estados";
+RUN;
+
+/* Crio uma base com minha variável Estado */
+DATA alura.cadastro_cliente_v2;
+set alura.cadastro_cliente;
+
+Estado = input(substr(cep,1,2),estadosnum_.);
+format Estado estadotxt_.;
+
+RUN;COPIAR CÓDIGO
+
+Isso mostra que podemos usar os formatos tanto para realmente mudar uma variável como para apenas mudar como ela é mostrada, sem alterar seu conteúdo. Também vimos que podemos até mesmo criar nossos próprios formatos!
+
+Caso ainda tenha restado alguma dúvida, não deixe de usar o fórum.
+
+Vimos na aula como usar comandos nas chamadas das bases para personalizar como elas serão usadas na entrada dos meus procedimentos e manipulações, como por exemplo no caso abaixo:
+
+DATA teste1;
+set alura.cadastro_cliente (obs=15 keep=CPF CEP);
+
+Estado = put(input(substr(cep,1,2),best.),estados_.);
+
+RUN;COPIAR CÓDIGO
+
+Mas nós podemos usar esses comandos nos comandos que escrevem, que criam as bases também, não apenas nos comandos que as leem. Por exemplo, nos data steps eu declaro qual base quero criar após o comando DATA, e eu poderia mudar como ela será criada usando estes mesmo comandos, por exemplo:
+
+DATA teste1  (obs=15 keep=CPF CEP Estado);
+set alura.cadastro_cliente;
+
+Estado = put(input(substr(cep,1,2),best.),estados_.);
+
+RUN;COPIAR CÓDIGO
+
+A diferença é que aqui a base que eu lerei permanece inalterada, com todas as linhas e variáveis, apenas a base que eu irei escrever será afetada pelos comandos obs e keep. Observe que como a variável Estado existe na minha base de saída, eu preciso acrescentar ele ao keep também, caso contrário ele não estará na base.
+
+O comando rename também pode ser usado nas chamadas de leitura e escrita de bases, da mesma forma que o where. Apenas preciso lembrar de colocar seus parâmetros entre parênteses também. Por exemplo, o código abaixo que vimos anteriormente:
+
+DATA teste1;
+set alura.cadastro_cliente (obs=max);
+
+precep = substr(cep,1,2);
+precep2 = input(precep,best.);
+
+drop precep;
+rename precep2 = precep;
+
+RUN;COPIAR CÓDIGO
+
+Poderia ser reescrito da seguinte forma:
+
+DATA teste1
+    (drop=precep
+    rename=(precep2=precep));
+set alura.cadastro_cliente;
+
+precep = substr(cep,1,2);
+precep2 = input(precep,best.);
+
+RUN;COPIAR CÓDIGO
+
+E sobre o uso de formatos e do PROC FORMAT, eles interagem com os missings de uma forma interessante. Lembrando: missings não são um valor em si, mas se eu precisar comparar ele com um número, o SAS sempre considera que o missing é menor que qualquer outro valor.
+
+Agora, por eu não estar comparando os missings diretamente com um número, e sim procurando um valor em uma lista de valores, se meu formato personalizado não incluir especificamente uma classe onde o missing se encaixe, minha variável resultante também será missing. Por exemplo, no formato abaixo (usado para classificar a data de lançamento dos jogos):
+
+PROC FORMAT;
+    value lancamento_
+        low    - 201312 = "Antigo"
+        201401 - 201606 = "Outro"
+        201607 - high   = "Lançamento";
+RUN;COPIAR CÓDIGO
+
+Se eu usá-lo para classificar minha variável de data na base cadastro_produto as observações em que minha data é missing continuarão sendo missing na minha flag de lançamento. Agora, como no formato abaixo eu tenho uma categoria de exceção, e o missing é uma observação que cairia justamente nesta classe também e consequentemente seria classificado dentro da categoria Outro.
+
+PROC FORMAT;
+    value lancamento_
+        low    - 201312 = "Antigo"
+        201607 - high   = "Lançamento"
+        other           = "Outro";
+RUN;
