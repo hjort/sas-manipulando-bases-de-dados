@@ -1,0 +1,138 @@
+Encontrar bases de dados com algum tipo de problema não é algo incomum, por isso precisamos estar sempre atentos com as informações que estamos usando, pois se elas forem ruins, nossas conclusões podem estar erradas.
+
+Na nossa base de cadastro de produtos usamos a variável data para construir outra variável, a flag_lancamento, por isso é importante dar uma olhada com mais cuidado nela. Descobrimos que em algumas observações eu não tenho a data preenchida. Essa ausência de informação que uma variável pode ter nós chamamos de missing (“ausência” ou “falta”, em inglês). Aprendemos uma nova opção do PROC FREQ, a missing, que faz com que as observações que não estão preenchidas apareçam dentro da minha listagem de categorias como uma categoria própria, e assim usamos o código abaixo para ver que temos 3 observações missings na minha variável data:
+
+PROC FREQ
+    data = alura.cadastro_produto_v2;
+    table data / missing;
+RUN;COPIAR CÓDIGO
+
+Vimos que podemos usar o comando WHERE em um data step para realizar uma operação conhecida como filtro, ou seja, para filtrar nossa base de dados e assim manter apenas as observações que atendam as condições do nosso filtro (o que vem depois do WHERE). Utilizamos este comando para construir uma base intermediária onde conseguimos manter nela apenas as minhas linhas onde a variável Data é missing:
+
+DATA teste1;
+set alura.cadastro_produto_v2;
+
+where data = .;
+
+RUN;COPIAR CÓDIGO
+
+Assim conseguimos descobrir mais informações sobre estas datas não preenchidas, como, por exemplo, o nome de cada um dos jogos onde isso acontece. Como todas as cópias que temos com o mesmo nome (ou título) são cópias do mesmo jogo, todas elas deveriam ter a mesma data de lançamento. Assim, se encontrarmos outra cópia do mesmo jogo com a data de lançamento preenchida saberemos de fato a data que deveria estar preenchida nestes meus missings.
+
+Usamos o comando WHERE novamente para filtrar as linhas onde a minha variável Nome é preenchida com um dos 3 nomes que preciso examinar:
+
+DATA teste1;
+set alura.cadastro_produto_v2;
+
+where nome = "Soccer" OR
+    nome = "Forgotten Echo" OR
+    nome = "Fireshock";
+
+RUN;COPIAR CÓDIGO
+
+Usamos o operador lógico Ou (“Or” em inglês), para declararmos que desejamos as observações tenham o nome igual a “Soccer” OU "Forgotten Echo" OU "Fireshock".
+
+Mas aqui estamos buscando um conjunto de valores possíveis de uma única variável, assim não precisamos ficar repetindo a expressão nome = <...>, podemos simplesmente dizer ao SAS que queremos um conjunto de valores que esteja dentro de uma variável usando a expressão IN, da seguinte forma:
+
+DATA teste1;
+set alura.cadastro_produto_v2;
+
+where nome in ("Soccer","Forgotten Echo","Fireshock");
+
+RUN;COPIAR CÓDIGO
+
+Obs: Podemos separar os termos dentro dos parênteses do in por vírgulas ou espaços.
+
+Um PROC FREQ pode ser usado para checar as datas de cada título nesta base temporária, mas vimos que nem precisamos criar essa base, pois este filtro pode ser aplicado diretamente quando declaramos qual base desejamos usar como entrada do nosso comando! O comando é parecido com o que usamos no data step, mas ele fica dentro de parênteses, e colocamos um “igual” depois do where:
+
+PROC FREQ
+    data=alura.cadastro_produto_v2
+        (where=(nome in ("Soccer" "Forgotten Echo" "Fireshock")));
+    table nome*data
+        /list missing;
+RUN;COPIAR CÓDIGO
+
+Note que também usamos as opções list e missing para gerar nossa listagem de frequências. Usando o comando dessa forma nos ajuda a obter a informação que desejamos sem precisar criar uma base intermediária adicional.
+
+Falta agora consertar a nossa variável de data e, consequentemente, nossa variável flag_lancamento. Use os comandos IF … THEN DO e SELECT para preencher os missings na variável de data e recalcule a variável de flag_lancamento. Para relembrar:
+
+O jogo Fireshock foi lançado em 201706,
+O jogo Forgotten Echo foi lançado em 201411 e
+O jogo Soccer foi lançado em 201709.
+Não se esqueça de salvar a base, comentar e salvar o código.
+
+O trecho do código que fizemos em aula ficou assim:
+
+/* Corrige a data */
+DATA teste2;
+set alura.cadastro_produto_v2;
+
+if data = . then do;
+    select(nome);
+        when ("Fireshock")         data = 201706;
+        when ("Forgotten echo")    data = 201411;
+        when ("Soccer")            data = 201709;
+        otherwise;
+    end;
+end;
+
+RUN;
+
+/* Salva uma nova versão da base de cadastro produto */
+DATA alura.cadastro_produto_v3;
+set teste2;
+
+* Cria a flag de lançamento ;
+if data > 201606
+    then flag_lancamento = 1;
+    else flag_lancamento = 0;
+
+* Marca o rótulo da flag ;
+label lancamento = "Marca 1 para jogos que são lançamento e 0 caso contrário";
+
+RUN;COPIAR CÓDIGO
+
+No primeiro data step corrigimos a data, colocando nosso comando select (que corrige a data em função do nome do jogo) dentro do if … then do (que checa se a data é missing). No segundo data step criamos novamente a variável flag_lancamento a partir da data corrigida, marcamos seu rótulo (com o comando label) e salvamos a base como cadastro_produto_v3, dentro do diretório da Alura.
+
+Obs: Aqui usamos dois data steps para fazer essa manipulação da base. Poderíamos ter feito com um só, apenas precisaríamos garantir que criamos a variável de lançamento depois de corrigir a variável de data!
+
+Aqui estão algumas informações adicionais interessantes sobre o que vimos em aula:
+
+No PROC FREQ vimos como fazer o filtro a partir de comandos adicionais na chamada da base (logo após o nome da base), colocando o filtro todo e os critérios entre parênteses, e colocando um "igual" após o where, na forma (where = (<critério do filtro>)). Mas este procedimento também possui a opção de receber um parâmetro (como o parâmetro table) que justamente é um filtro, de uma forma ainda mais parecida com o que usamos em um data step. Ele segue a seguinte estrutura:
+
+PROC FREQ
+  data=alura.cadastro_produto;
+  where data = .;
+  table nome;
+RUN;COPIAR CÓDIGO
+
+Basta colocar como uma linha de comando adicional, e neste caso não são colocados nem parênteses nem o igual.
+
+Vimos como fazer atribuições de valores de variáveis diretamente, mas podemos também criar variáveis a partir de outras variáveis, basta usar o nome da variável que desejo utilizar na minha conta. Inclusive posso realizar operações matemáticas, como + (adição), - (subtração), * (multiplicação), / (divisão) e ** (exponenciação). Por exemplo, se eu quero que a variavel2 receba o valor da variavel1 ao quadrado, posso escrever a seguinte expressão:
+
+variavel2 = variavel1**2;COPIAR CÓDIGO
+
+Apenas precisamos ter cuidado em escrever corretamente o nome das variáveis, pois podemos chegar em um erro se tentarmos usar uma variável que não exista ainda na base, ou sobrescrever uma variável da base se usarmos um nome igual.
+
+Atribuímos valores numéricos a variáveis numéricas, mas como podemos atribuir um texto a uma variável do tipo caractere? Por exemplo, se eu quiser que minha variável de lançamento possua os valores Sim e Não ao invés de zero ou um? Sabemos que se eu escrever flag_lancamento = Sim; eu provavelmente obterei um erro pois dificilmente tenho uma variável chamada Sim na minha base. Para resolver este problema é só colocar meu texto entre aspas, assim o SAS sabe que é um texto e não um comando ou o nome de uma variável:
+
+if data > 201606
+  then flag_lancamento2 = "Sim";
+  else flag_lancamento2 = "Não";COPIAR CÓDIGO
+  
+Vimos que para variáveis numéricas o missing é representado como um ponto. Nas variáveis de texto (do tipo caractere) ele é representado simplesmente como um espaço em branco. Juntando isso com o fato de que colocamos os textos entre aspas (como vimos acima), se queremos filtrar os missings de uma variável do tipo caractere, utilizaríamos o código abaixo:
+where variavel_caractere = " ";COPIAR CÓDIGO
+
+Vimos que se eu quiser realizar mais de uma operação que dependa de um único condicional eu posso usar a estrutura
+if <condição> then do;
+  <diversas operações>
+end;COPIAR CÓDIGO
+
+Mas podemos usar esse comando de do; inclusive depois do meu comando else quando eu quiser realizar diversas operações inclusive quando minha condição inicial não for atendida (no meu "senão"), da seguinte forma:
+if <condição> then do;
+  <diversas operações>
+end;
+else do;
+  <diversas operações>
+end;COPIAR CÓDIGO
+
+Repare que eu sempre preciso usar o comando end; para indicar onde o comando do; acaba.
